@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1ère page EJS</title>
+</head>
+<body>
+    <p>Bonjour <%= nom %></p>
+    <p><%= personTitle %></p>
+    <ul>
+        <% persons.forEach(function(person){ %>
+            <li>
+                <strong><%= person.nom %></strong>
+                <strong><%= person.prenom %></strong>
+                <%= person.age %>
+            </li>  
+        <% }); %>
+    </ul>
+</body>
+
+</html>
