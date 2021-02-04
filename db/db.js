@@ -16,7 +16,7 @@ db.connect((err) => {
     }
     console.log('Connected to database');
 });
-// l'objet global nous donneune portée globale dans l'ensemble du projet
+// l'objet global nous donne une portée globale dans l'ensemble du projet
 // on peut donc appeler db partout
 global.db = db;
 

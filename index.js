@@ -5,12 +5,20 @@ var person = require('./routes/person');
 // on importe le module router qui est dans address
 var address = require('./routes/address');
 // on appelle body parser et on le stocke dans une var
+// on importe le module router de employee
+var employee = require('./routes/employee');
 var bodyParser = require('body-parser');
 // import du module mysql2 -- déplacé dans fichier db
 // var mysql2 = require('mysql2');
+// import du module cors => 
+// Le «  Cross-origin resource sharing » (CORS) ou « partage des ressources entre origines multiples » (en français, moins usité) est un mécanisme qui consiste à ajouter des en-têtes HTTP afin de permettre à un agent utilisateur d'accéder à des ressources d'un serveur situé sur une autre origine que le site courant. Un agent utilisateur réalise une requête HTTP multi-origine (cross-origin) lorsqu'il demande une ressource provenant d'un domaine, d'un protocole ou d'un port différent de ceux utilisés pour la page courante.
+var cors = require('cors');
 // APPELS DES FICHIERS MVC
 const db = require('./db/db');
 var personneController = require('./controllers/personne.controller');
+
+// import du module mongodb
+// var MongoClient = require('mongodb').MongoClient;
 
 
 //---------------------------------------
@@ -18,6 +26,10 @@ var personneController = require('./controllers/personne.controller');
 // on met les styles en public 
 // on utilise des ressources en static = au chargement de l'application
 app.use('/assets/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
+
+// ???
+// app.use(cors())
+// app.use(bodyParser.json());
 
 // -- déplacé dans fichier db
 // préparation la connexion à la BDD formation_express
@@ -51,14 +63,133 @@ app.set('engine_view', 'ejs');
 // accessible via req.body (récupère les objets stockés)
 app.use(bodyParser.urlencoded({extended : false}));
 
+// permet de transformer ce qui a été récupérer par bodyParser au format json 
+app.use(cors());
+app.use(bodyParser.json());
+
+//ajout Mongodb
+// MongoDB est une base de données NoSQL orientée document
+// utilisée pour le stockage de données à haut volume
+// Ce type de SGBD utilise des schémas dynamiques qui signifient que
+// l'on peut créer des enregistrements sans d'abord définir la structure, 
+// comme les champs ou les types et les valeurs 
+// MongoDB nous permet de modifier la structure des enregistrements, que nous appelons documents
+// en ajoutant de nouveaux champs ou en supprimant ceux existants. 
+
+// MongoDB vs MySQL
+// MongoDB réprésente les données comme des documents JSON tandis que 
+// MySQL représente les données dans des tables et des lignes.
+
+// Dans MongoDB, nous n'avons pas besoin de définir le schéma
+// tandis que dans MySQL, nous devons définir nos tables et colonnes 
+
+// MongoDB ne prend pas en charge JOIN, à la différence de MySQL.
+
+// MongoDB utilise JavaScript comme langage de requête tandis que MySQL utilise le langage de requête structuré (SQL).
+
+// MongoClient.connect('mongodb://localhost:27017', { useUnifiedTopology: true}, (
+//     err, client) => {
+
+//         if(err) throw err;
+//         // --------on appelle la database ---------------
+//         var db = client.db('formation');
+//         // on appelle la collection
+//         var employes = db.collection('employes');
+
+//         // ----------Insertion d'un document dans la collection employes----------------
+//         // insertMany ou insertOne
+//         // employes.insertOne({nom: 'Noire', prenom: 'Veuve'}, (error, res) => {
+//         //     if(error) throw err;
+//         //     // n est l'objet concerné 
+//         //     // result.n => pour obtenir le nb d'objet concerné (ici i)
+//         //     console.log(res.result.n);
+//         //     // ops.length => pour obtenir la taille/longueur de l'opération (ici un concerné)
+//         //     console.log(res.ops.length);
+//         //     console.log(res.result.n + ' insérés avec succès !');
+//         // });
+
+//         // ----------Insertion de plusieurs documents dans la collection employes----------------
+//         // employes.insertMany([{nom: 'LeBlanc', prenom: 'Gandalf'}, {nom: 'Stark', prenom: 'Tony'}, {nom: 'Poppins', prenom: 'Mary'}], (error, result) => {
+//         //     if(error) throw err;
+//         //     // n est l'objet concerné 
+//         //     console.log(result.result.n);
+//         //     console.log(result.ops.length);
+//         //     console.log(result.result.n + ' insérés avec succès !');
+//         // });
+
+//         // Lecture de données - créer un array contenant tous les documents présents
+//         // dans la collection employes 
+//         // employes.find().toArray(function(err, result) {
+//         //     if(err) throw err;
+//         //     console.log(result);
+//         // });
+
+//         // ----------------Update des données -----------------------------
+//         // updateMany ou updateOne
+//         // ici on précise la clé/valeur de recherche 
+//         // Tous ceux qui auront comme prénom 'John'
+//         // employes.updateMany({ prenom: 'John' }, {
+//         //     // set => idem que le set qu'on a dans le langage SQL
+//         //     // on attribut à tous ceux qui ont le prénom John le nom Travolta
+//         //     $set: {
+//         //         nom:
+//         //             'Travolta'
+//         //     }
+//         // }, { multi: true }, (error, result) => {
+//         //     if (error)
+//         //         throw error;
+//         //     if (result.result.nModified > 0)
+//         //         console.log('au moins ' + result.result.nModified + ' documents modifiés');
+//         // });
+
+//         // employes.updateOne({ prenom: 'John' }, {
+//         //     $set: {
+//         //         nom:
+//         //             'Cash'
+//         //     }
+//         // }, { multi: true }, (error, result) => {
+//         //     if (error)
+//         //         throw error;
+//         //     if (result.result.nModified > 0)
+//         //         console.log('au moins ' + result.result.nModified + ' documents modifies');
+//         // });
+
+//         // // Suppression - plusieurs documents 
+//         // employes.deleteMany({nom: 'Travolta'}, (error, result)=> {
+//         //     if(error) {
+//         //         throw err;
+//         //     } 
+//         //     if(result.result.n > 0) {
+//         //         console.log(result.result.n + " Documents supprimés");
+//         //     }
+//         //     else {
+//         //         console.log("Aucun élément correspondant aux critères choisis.");
+//         //     }
+//         // });
+
+//         // Suppression - 1 seul élément
+//         // employes.deleteOne({nom: 'Travolta'}, (error, result)=> {
+//         //     if(error) {
+//         //         throw err;
+//         //     } 
+//         //     if(result.result.n > 0) {
+//         //         console.log(result.result.n + " Document supprimé");
+//         //     }
+//         //     else {
+//         //         console.log("Aucun élément correspondant aux critères choisis.");
+//         //     }
+//         // });
+//     }
+// );
+
 // ------------------------exo DB ------------------------
 // ---- vérification------
-db.query('Select * from personne', function (err, rows) {
-    if (err) throw err;
-    for (i = 0; i < rows.length; i++) {
-        console.log(rows[i].prenom + " " + rows[i].nom);
-    };
-});
+// db.query('Select * from personne', function (err, rows) {
+//     if (err) throw err;
+//     for (i = 0; i < rows.length; i++) {
+//         console.log(rows[i].prenom + " " + rows[i].nom);
+//     };
+// });
 
 // DEPLACER DANS PERSON.JS
 // on définit la route correspondante
@@ -197,6 +328,7 @@ db.query('Select * from personne', function (err, rows) {
 // http://localhost:8080/person/edit
 // http://localhost:8080/person/delete
 // http://localhost:8080/person/search
+// http://localhost:8080/person/forms 
 app.use('/person', person);
 
 // idem avec le module address
@@ -206,6 +338,8 @@ app.use('/address', address);
 // http://localhost:8080/address/delete
 // http://localhost:8080/address/search
 
+// idem avec le module employee
+app.use('/employee', employee);
 
 // ---------------------- INTRO MIDDLEWARE -------------------
 // INTRO MIDDLEWARE
@@ -290,10 +424,17 @@ app.use('/address', address);
 // });
 
 // ---------------------------------------------------------------
-// Obligatoire pour tous les exemples 
+// Obligatoire pour tous les exemples - le lancement du serveur 
 
 // on spécifie le serveur qui va être utilisé 
-app.listen(8080, function() {
-    console.log("Express en attente");
-    // 1)quand on lance la page http://localhost:8080/, cela lance une requête
-});
+// app.listen(8080, function() {
+//     console.log("Express en attente");
+//     // 1)quand on lance la page http://localhost:8080/, cela lance une requête
+// });
+
+// autre façon de déclarer le app.listen:
+
+var server = {
+    port: 8080
+};
+app.listen(server.port, () => console.log(`Server started, listening port: ${server.port}`));

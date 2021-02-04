@@ -6,29 +6,30 @@ var express = require('express');
 var router = express.Router();
 // on appelle le controller
 var personneController = require('../controllers/personne.controller');
+const db = require('../db/db');
 
-router.get('/search', (req, res) => {
-    // instruction qui permet de retourner une réponse au client 
-    res.send('Recherche personne');
-});
+// router.get('/search', (req, res) => {
+//     // instruction qui permet de retourner une réponse au client 
+//     res.send('Recherche personne');
+// });
 
-// Précision d'une chaîne après notre route '/' = http://localhost:8080/add
-router.post('/add', (req, res) => {
-    // instruction qui permet de retourner une réponse au client 
-    res.send('Ajout personne');
-});
+// // Précision d'une chaîne après notre route '/' = http://localhost:8080/add
+// router.post('/add', (req, res) => {
+//     // instruction qui permet de retourner une réponse au client 
+//     res.send('Ajout personne');
+// });
 
-// put: requête HTTP pour la modification 
-router.put('/edit', (req, res) => {
-    // instruction qui permet de retourner une réponse au client 
-    res.send('Mise à jour personne');
-});
+// // put: requête HTTP pour la modification 
+// router.put('/edit', (req, res) => {
+//     // instruction qui permet de retourner une réponse au client 
+//     res.send('Mise à jour personne');
+// });
 
-// delete: requête HTTP pour la suppression 
-router.delete('/delete', (req, res) => {
-    // instruction qui permet de retourner une réponse au client 
-    res.send('Suppression personne');
-});
+// // delete: requête HTTP pour la suppression 
+// router.delete('/delete', (req, res) => {
+//     // instruction qui permet de retourner une réponse au client 
+//     res.send('Suppression personne');
+// });
 
 // on définit la route qui affichera le contenu de index.ejs =, ici '/'
 // on créé une fonction fléchée qui va utiliser la méthode render()
@@ -153,6 +154,94 @@ router.get('/deletePersonne/:id', (req, res) => {
             console.log('Suppression réussie');
             // redirection vers /forms
             res.redirect('/person/forms');
+        });
+});
+
+// ----- CREATION API REST --------------
+// http://localhost:8080/person/search
+// Retournera un tableau d'objet JSON
+router.get('/search', (req, res) => {
+    let query = "Select * from personne";
+
+    db.query(query, (err, result) => {
+        if (err) {
+            res.redirect('/forms');
+        }
+        res.json({
+            status: 200,
+            result,
+            message: "Person list retrieved successfully"
+        })
+    });
+});
+
+// http://localhost:8080/person/add
+router.post('/add', (req, res) => {
+    
+    var data = {
+        nom: req.body.nom,
+        prenom: req.body.prenom
+    };
+
+    db.query("Insert into personne set ?", data, (err, rows) => {
+        if (err) throw err;
+        console.log("Insertion réussie");
+        res.json({
+            status: 200,
+            message: "New person added successfully"
+        });
+    });
+});
+
+// http://localhost:8080/person/update
+router.put('/update', (req, res) => {
+    
+    var data = {
+        id: req.body.id,
+        nom: req.body.nom,
+        prenom: req.body.prenom
+    };
+
+    db.query("UPDATE personne SET ? WHERE id = " + data.id, data, (err, rows) => {
+        if (err) throw err;
+        console.log("Mise à jour réussie");
+        res.json({
+            status: 200,
+            message: "Person updated successfully"
+        });
+    });
+});
+
+// http://localhost:8080/person/select/:id
+router.get('/select/:id', (req, res) => {
+    
+    var id = req.params.id;
+
+    db.query('SELECT * FROM personne WHERE id = "' + id + '"', 
+        (err, rows) => {
+            if (err) throw err;
+
+            res.json({
+                rows,
+                status: 200,
+                message: "Person selected successfully"
+            });
+        });
+});
+
+// http://localhost:8080/person/delete/:id
+router.delete('/delete/:id', (req, res) => {
+    
+    var id = req.params.id;
+
+    db.query('DELETE FROM personne WHERE id = "' + id + '"', 
+        (err, rows) => {
+            if (err) throw err;
+
+            res.json({
+                status: 200,
+                message: "Person deleted successfully"
+            });
         });
 });
 
